@@ -1,0 +1,17 @@
+{
+  "name": "MY FINANCE PRO",
+  "short_name": "Finance Pro",
+  "description": "Personal finance tracker in INR",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f3f6fb",
+  "theme_color": "#101b35",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
