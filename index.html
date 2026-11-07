@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101b35"><meta name="description" content="MY FINANCE PRO - personal finance tracker">
+<link rel="manifest" href="manifest.webmanifest">
+<title>MY FINANCE PRO</title>
+<style>
+:root{--navy:#101b35;--blue:#315be8;--bg:#f3f6fb;--card:#fff;--text:#172033;--muted:#68758b;--green:#12834b;--red:#c43d4b;--line:#e5eaf2}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--text);padding-bottom:82px}
+header{background:linear-gradient(135deg,#101b35,#243d78);color:white;padding:22px 18px 18px;border-radius:0 0 24px 24px}
+.brand{font-size:12px;letter-spacing:2px;font-weight:800;opacity:.8}.balance{font-size:30px;font-weight:800;margin:8px 0 2px}.sub{font-size:12px;color:#cbd5e7}
+main{max-width:760px;margin:auto;padding:14px}.tabs{display:flex;gap:7px;overflow:auto;margin:12px 0}.tab{border:0;border-radius:20px;padding:10px 14px;background:#e5eaf4;color:#34415b;font-weight:700;white-space:nowrap}.tab.active{background:var(--navy);color:white}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:10px;box-shadow:0 2px 10px #17203308}.label{font-size:12px;color:var(--muted)}.num{font-size:20px;font-weight:800;margin-top:5px}.green{color:var(--green)}.red{color:var(--red)}
+h2{font-size:17px;margin:8px 0 12px}.row{display:flex;justify-content:space-between;align-items:center;gap:10px}.field{margin:10px 0}label{display:block;font-size:12px;color:var(--muted);font-weight:700;margin-bottom:5px}
+input,select,button{font:inherit}input,select{width:100%;border:1px solid var(--line);border-radius:10px;padding:11px;background:white;color:var(--text)}
+.btn{border:0;background:var(--blue);color:white;border-radius:11px;padding:12px 15px;font-weight:800;width:100%;margin-top:7px}.btn.secondary{background:#e8edf7;color:#23304a}.btn.danger{background:#fff0f1;color:var(--red)}
+nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:9px 2px calc(9px + env(safe-area-inset-bottom));z-index:5}
+nav button{border:0;background:none;color:#63718a;font-size:10px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:3px}nav button.active{color:var(--blue)}nav b{font-size:19px}
+.item{padding:11px 0;border-bottom:1px solid var(--line)}.item:last-child{border:0}.pill{font-size:10px;border-radius:20px;padding:4px 8px;background:#edf1f8;color:#46536a}
+.progress{height:9px;background:#e9eef6;border-radius:20px;overflow:hidden}.progress span{display:block;height:100%;background:var(--green)}
+.small{font-size:11px;color:var(--muted)}.hidden{display:none!important}.two{display:grid;grid-template-columns:1fr 1fr;gap:9px}.empty{text-align:center;color:var(--muted);padding:22px 5px;font-size:13px}
+@media(min-width:600px){main{padding:22px}.balance{font-size:36px}}
+</style>
+</head>
+<body>
+<header><div class="brand">MY FINANCE PRO · INR</div><div class="balance" id="heroNet">₹0</div><div class="sub">Estimated net worth · Update your accounts and investments</div></header>
+<main>
+<div class="tabs" id="periodTabs">
+<button class="tab active" data-period="day">Daily</button><button class="tab" data-period="week">Weekly</button><button class="tab" data-period="month">Monthly</button><button class="tab" data-period="year">Yearly</button>
+</div>
+<div class="card">
+<div class="row"><h2 id="periodTitle">Today</h2><input id="periodDate" type="date" style="width:auto;max-width:160px"></div>
+<div class="grid">
+<div><div class="label">Income</div><div class="num green" id="sumIncome">₹0</div></div>
+<div><div class="label">Expenses</div><div class="num red" id="sumExpense">₹0</div></div>
+<div><div class="label">Net cash flow</div><div class="num" id="sumNet">₹0</div></div>
+<div><div class="label">Transactions</div><div class="num" id="sumCount">0</div></div>
+</div></div>
+<section id="dashboard">
+<div class="card"><h2>Quick overview</h2><div class="two">
+<div><div class="label">Savings rate</div><div class="num" id="savingsRate">0%</div></div>
+<div><div class="label">Monthly budget left</div><div class="num" id="budgetLeft">₹0</div></div>
+</div></div>
+<div class="card"><h2>Recent transactions</h2><div id="recentList" class="empty">No transactions yet. Add your first entry.</div></div>
+</section>
+<section id="transactions" class="hidden">
+<div class="card"><h2>Add transaction</h2>
+<div class="two"><div class="field"><label>Type</label><select id="txType"><option>Expense</option><option>Income</option><option>Transfer</option></select></div><div class="field"><label>Amount (₹)</label><input id="txAmount" type="number" min="0.01" step="0.01" placeholder="e.g. 250"></div></div>
+<div class="two"><div class="field"><label>Category</label><select id="txCategory"></select></div><div class="field"><label>Date</label><input id="txDate" type="date"></div></div>
+<div class="field"><label>Account</label><select id="txAccount"></select></div><div class="field"><label>Note</label><input id="txNote" placeholder="What was this for?"></div>
+<button class="btn" id="saveTx">Save transaction</button></div>
+<div class="card"><h2>All transactions</h2><div id="allList" class="empty">No records.</div></div>
+</section>
+<section id="budget" class="hidden">
+<div class="card"><h2>Monthly budget</h2><div class="field"><label>Month</label><input id="budgetMonth" type="month"></div><div class="field"><label>Total monthly expense limit (₹)</label><input id="budgetAmount" type="number" min="0" placeholder="e.g. 8000"></div><button class="btn" id="saveBudget">Save budget</button><div style="margin-top:16px" class="row"><b>Spent</b><b id="budgetSpent">₹0</b></div><div class="progress" style="margin:8px 0"><span id="budgetProgress" style="width:0%"></span></div><div class="small" id="budgetText">Enter a budget to track spending.</div></div>
+</section>
+<section id="assets" class="hidden">
+<div class="card"><h2>Accounts & cash</h2><div class="field"><label>Account name</label><input id="accountName" placeholder="Cash / Bank / Wallet"></div><div class="field"><label>Current balance (₹)</label><input id="accountBalance" type="number" min="0" placeholder="Current balance"></div><button class="btn" id="addAccount">Add / update account</button><div id="accountList" class="empty">No accounts yet.</div></div>
+<div class="card"><h2>Investments</h2><div class="field"><label>Investment name</label><input id="invName" placeholder="SIP / stock / FD"></div><div class="two"><div class="field"><label>Invested (₹)</label><input id="invCost" type="number" min="0"></div><div class="field"><label>Current value (₹)</label><input id="invValue" type="number" min="0"></div></div><button class="btn" id="addInv">Add investment</button><div id="investmentList" class="empty">No investments yet.</div></div>
+<div class="card"><h2>Loans & debt</h2><div class="field"><label>Loan / lender</label><input id="debtName" placeholder="Loan or person"></div><div class="field"><label>Outstanding balance (₹)</label><input id="debtValue" type="number" min="0"></div><button class="btn" id="addDebt">Add debt</button><div id="debtList" class="empty">No debt records.</div></div>
+</section>
+<section id="goals" class="hidden">
+<div class="card"><h2>Savings goals</h2><div class="field"><label>Goal name</label><input id="goalName" placeholder="Emergency fund"></div><div class="two"><div class="field"><label>Target (₹)</label><input id="goalTarget" type="number" min="1"></div><div class="field"><label>Saved (₹)</label><input id="goalSaved" type="number" min="0"></div></div><button class="btn" id="addGoal">Save goal</button><div id="goalList" class="empty">No goals yet.</div></div>
+</section>
+<section id="backup" class="hidden">
+<div class="card"><h2>Reports & backup</h2><p class="small">Download a JSON backup of all your records, or export transactions as CSV. Keep backups somewhere safe.</p><button class="btn" id="backupBtn">Download full backup (JSON)</button><button class="btn secondary" id="csvBtn">Export transactions (CSV)</button><label style="margin-top:16px">Restore backup (JSON)</label><input id="restoreFile" type="file" accept="application/json"><button class="btn secondary" id="restoreBtn">Restore selected backup</button><p class="small">Never store PINs, OTPs, passwords, full card numbers or CVV in this app.</p></div>
+</section>
+</main>
+<nav>
+<button class="active" data-page="dashboard"><b>⌂</b>Home</button><button data-page="transactions"><b>＋</b>Entries</button><button data-page="budget"><b>▤</b>Budget</button><button data-page="assets"><b>◈</b>Assets</button><button data-page="goals"><b>◎</b>Goals</button><button data-page="backup"><b>⇩</b>Backup</button>
+</nav>
+<script>
+const KEY='my-finance-pro-v1';
+const today=new Date().toISOString().slice(0,10);
+let data=JSON.parse(localStorage.getItem(KEY)||'null')||{transactions:[],accounts:[],investments:[],debts:[],goals:[],budgets:{}};
+let period='day', selectedDate=today;
+const $=id=>document.getElementById(id), money=n=>'₹'+Number(n||0).toLocaleString('en-IN',{maximumFractionDigits:2});
+function save(){localStorage.setItem(KEY,JSON.stringify(data));render()}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+const categories=['Salary','Delivery income','Business income','Other income','Food & groceries','Petrol / transport','Rent / housing','Bills & utilities','Mobile / internet','Health','Shopping / clothing','Family','Entertainment','Education','Investment','EMI / debt','Other'];
+function fillSelects(){ $('txCategory').innerHTML=categories.map(x=>`<option>${x}</option>`).join('');$('txAccount').innerHTML=['Cash',...data.accounts.map(a=>a.name)].map(x=>`<option>${esc(x)}</option>`).join('')}
+function inPeriod(date){if(period==='day')return date===selectedDate;let d=new Date(date+'T12:00:00'),s=new Date(selectedDate+'T12:00:00');if(period==='week'){s.setDate(s.getDate()-((s.getDay()+6)%7));let e=new Date(s);e.setDate(e.getDate()+7);return d>=s&&d<e}if(period==='month')return date.slice(0,7)===selectedDate.slice(0,7);return date.slice(0,4)===selectedDate.slice(0,4)}
+function itemHTML(title,sub,amount,kind,del){return `<div class="item row"><div style="min-width:0"><b>${esc(title)}</b><div class="small">${esc(sub)}</div></div><div class="row"><b class="${kind==='Income'?'green':kind==='Expense'?'red':''}">${kind==='Income'?'+':kind==='Expense'?'-':''}${money(amount)}</b><button class="btn danger" style="width:auto;padding:6px 9px;margin:0" data-del="${del}">×</button></div></div>`}
+function render(){fillSelects();let arr=data.transactions.filter(t=>inPeriod(t.date)),inc=arr.filter(t=>t.type==='Income').reduce((s,t)=>s+t.amount,0),exp=arr.filter(t=>t.type==='Expense').reduce((s,t)=>s+t.amount,0);
+$('sumIncome').textContent=money(inc);$('sumExpense').textContent=money(exp);$('sumNet').textContent=money(inc-exp);$('sumCount').textContent=arr.length;
+$('periodTitle').textContent=period==='day'?'Daily summary':period==='week'?'Weekly summary':period==='month'?'Monthly summary':'Yearly summary';
+let accounts=data.accounts.reduce((s,a)=>s+a.balance,0),invest=data.investments.reduce((s,a)=>s+a.value,0),debt=data.debts.reduce((s,a)=>s+a.balance,0);
+$('heroNet').textContent=money(accounts+invest-debt);
+$('savingsRate').textContent=(inc?((inc-exp)/inc*100):0).toFixed(1)+'%';
+let bm=selectedDate.slice(0,7),b=data.budgets[bm]||0,spent=data.transactions.filter(t=>t.type==='Expense'&&t.date.slice(0,7)===bm).reduce((s,t)=>s+t.amount,0);
+$('budgetLeft').textContent=money(b-spent);
+$('budgetMonth').value=bm;$('budgetAmount').value=b||'';$('budgetSpent').textContent=money(spent);$('budgetProgress').style.width=(b?Math.min(100,spent/b*100):0)+'%';$('budgetText').textContent=b?`${(spent/b*100).toFixed(1)}% of monthly budget used · ${money(Math.max(0,b-spent))} remaining`:'Enter a budget to track spending.';
+let recent=data.transactions.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5);
+$('recentList').innerHTML=recent.length?recent.map(t=>`<div class="item row"><div><b>${esc(t.category)}</b><div class="small">${t.date} · ${esc(t.note||t.account)}</div></div><b class="${t.type==='Income'?'green':t.type==='Expense'?'red':''}">${t.type==='Income'?'+':t.type==='Expense'?'-':''}${money(t.amount)}</b></div>`).join(''):'<div class="empty">No transactions yet. Add your first entry.</div>';
+let all=data.transactions.slice().sort((a,b)=>b.date.localeCompare(a.date));$('allList').innerHTML=all.length?all.map((t,i)=>itemHTML(t.category,`${t.date} · ${t.account} · ${t.note||t.type}`,t.amount,t.type,'tx-'+i)).join(''):'<div class="empty">No records.</div>';
+$('accountList').innerHTML=data.accounts.length?data.accounts.map((a,i)=>itemHTML(a.name,'Account balance',a.balance,'',`acc-${i}`)).join(''):'<div class="empty">No accounts yet.</div>';
+$('investmentList').innerHTML=data.investments.length?data.investments.map((a,i)=>itemHTML(a.name,`Invested ${money(a.cost)} · Gain/Loss ${money(a.value-a.cost)}`,a.value,'',`inv-${i}`)).join(''):'<div class="empty">No investments yet.</div>';
+$('debtList').innerHTML=data.debts.length?data.debts.map((a,i)=>itemHTML(a.name,'Outstanding balance',a.balance,'Expense',`debt-${i}`)).join(''):'<div class="empty">No debt records.</div>';
+$('goalList').innerHTML=data.goals.length?data.goals.map((g,i)=>`<div class="item"><div class="row"><b>${esc(g.name)}</b><b>${Math.min(100,g.target?g.saved/g.target*100:0).toFixed(1)}%</b></div><div class="progress" style="margin:8px 0"><span style="width:${Math.min(100,g.target?g.saved/g.target*100:0)}%"></span></div><div class="small">${money(g.saved)} saved of ${money(g.target)} · ${money(Math.max(0,g.target-g.saved))} remaining</div><button class="btn danger" data-del="goal-${i}">Delete goal</button></div>`).join(''):'<div class="empty">No goals yet.</div>';
+}
+function showPage(p){document.querySelectorAll('main section').forEach(s=>s.classList.add('hidden'));$(p).classList.remove('hidden');document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.page===p))}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>showPage(b.dataset.page));
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{period=b.dataset.period;document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===b));render()});
+$('periodDate').value=today;$('txDate').value=today;
+$('periodDate').onchange=e=>{selectedDate=e.target.value||today;render()};
+$('saveTx').onclick=()=>{let amount=Number($('txAmount').value);if(!(amount>0)){alert('Please enter a valid amount');return}data.transactions.push({type:$('txType').value,amount,category:$('txCategory').value,date:$('txDate').value||today,account:$('txAccount').value,note:$('txNote').value});$('txAmount').value='';$('txNote').value='';save();alert('Transaction saved')};
+$('saveBudget').onclick=()=>{data.budgets[$('budgetMonth').value]=Number($('budgetAmount').value)||0;save()};
+$('addAccount').onclick=()=>{let name=$('accountName').value.trim(),balance=Number($('accountBalance').value);if(!name||balance<0)return alert('Enter account and balance');let a=data.accounts.find(x=>x.name.toLowerCase()===name.toLowerCase());if(a)a.balance=balance;else data.accounts.push({name,balance});$('accountName').value='';$('accountBalance').value='';save()};
+$('addInv').onclick=()=>{let name=$('invName').value.trim(),cost=Number($('invCost').value),value=Number($('invValue').value);if(!name||cost<0||value<0)return alert('Enter valid investment details');data.investments.push({name,cost,value});$('invName').value='';$('invCost').value='';$('invValue').value='';save()};
+$('addDebt').onclick=()=>{let name=$('debtName').value.trim(),balance=Number($('debtValue').value);if(!name||balance<0)return alert('Enter valid debt details');data.debts.push({name,balance});$('debtName').value='';$('debtValue').value='';save()};
+$('addGoal').onclick=()=>{let name=$('goalName').value.trim(),target=Number($('goalTarget').value),saved=Number($('goalSaved').value);if(!name||target<=0||saved<0)return alert('Enter valid goal details');data.goals.push({name,target,saved});$('goalName').value='';$('goalTarget').value='';$('goalSaved').value='';save()};
+document.addEventListener('click',e=>{let id=e.target.dataset.del;if(!id)return;let [type,n]=id.split('-');n=Number(n);if(type==='tx'){let list=data.transactions.slice().sort((a,b)=>b.date.localeCompare(a.date));let t=list[n];data.transactions.splice(data.transactions.indexOf(t),1)}else if(type==='acc')data.accounts.splice(n,1);else if(type==='inv')data.investments.splice(n,1);else if(type==='debt')data.debts.splice(n,1);else if(type==='goal')data.goals.splice(n,1);save()});
+function download(name,content,type){let blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();URL.revokeObjectURL(url)}
+$('backupBtn').onclick=()=>download('my-finance-pro-backup.json',JSON.stringify(data,null,2),'application/json');
+$('csvBtn').onclick=()=>{let rows=[['Date','Type','Category','Amount INR','Account','Note'],...data.transactions.map(t=>[t.date,t.type,t.category,t.amount,t.account,t.note])];let csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');download('my-finance-transactions.csv',csv,'text/csv')};
+$('restoreBtn').onclick=()=>{let f=$('restoreFile').files[0];if(!f)return alert('Choose a backup file');let r=new FileReader();r.onload=()=>{try{let d=JSON.parse(r.result);if(!Array.isArray(d.transactions))throw 0;data=d;save();alert('Backup restored')}catch(e){alert('Invalid backup file')}};r.readAsText(f)};
+render();
+if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+</script>
+</body></html>
